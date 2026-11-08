@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>المفتدى أحمد زيدان</title>
+<meta name="robots" content="noindex">
+<script>
+  // Any wrong address goes back to the home page (works for user and project sites).
+  (function () {
+    var seg = location.pathname.split('/')[1] || '';
+    var isProject = /\.github\.io$/i.test(seg) && seg.toLowerCase() !== location.hostname.toLowerCase();
+    location.replace(isProject ? '/' + seg + '/' : '/');
+  })();
+</script>
+</head>
+<body style="background:#0B0D12;color:#F4F1EA;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+  <a href="/" style="color:#E2B24C">الصفحة الرئيسية</a>
+</body>
+</html>
