@@ -1,0 +1,84 @@
+{
+  "settings": {
+    "whatsapp": "9647747933540",
+    "instagram": ""
+  },
+  "works": [
+    {
+      "title": "محتوى إنستغرام",
+      "cat": "social",
+      "type": "instagram",
+      "src": ""
+    },
+    {
+      "title": "العبها صح",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "big": true,
+      "src": "https://www.youtube.com/watch?v=8BUbFfH2wkc",
+      "thumb": "assets/works/al3abha-sah.jpg",
+      "desc": "بغداد، ألعاب بغداد · تقديم آية خليل"
+    },
+    {
+      "title": "تظاهرة الأمهات وسط بغداد",
+      "cat": "news",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=gfz6fqQAoEc",
+      "thumb": "assets/works/protest-mothers-baghdad.jpg",
+      "desc": "تغطية خاصة · تقديم آية خليل"
+    },
+    {
+      "title": "استراحة الجمعة",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=px6SX4miNmo",
+      "thumb": "assets/works/istirahat-aljumaa.jpg",
+      "desc": "ضيف الحلقة كابتن شهد · تقديم آية خليل"
+    },
+    {
+      "title": "صباح المتنبي",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=aZjRgmarbM8",
+      "thumb": "assets/works/sabah-almutanabbi.jpg",
+      "desc": "بغداد، شارع المتنبي · مع فاضل الخفاجي"
+    },
+    {
+      "title": "ناسنا تهمنا",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=9TflhVuUML8",
+      "thumb": "assets/works/nasna-tehimna.jpg",
+      "desc": "بغداد، باب الشرقي · تقديم مهيمن قصي"
+    },
+    {
+      "title": "مسائكم بغدادي",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=RP9pbswc7_w",
+      "thumb": "assets/works/masaakum-baghdadi.jpg",
+      "desc": "بغداد، شارع المتنبي · مع سجى زياد"
+    },
+    {
+      "title": "المرأة والمجتمع",
+      "cat": "programs",
+      "channel": "هنا العراق",
+      "type": "youtube",
+      "src": "https://www.youtube.com/watch?v=p2pzbdzLmY4",
+      "thumb": "assets/works/almaraa-walmujtama.jpg",
+      "desc": "بغداد، مول المنصور · تقديم إيناس الفتلاوي"
+    },
+    {
+      "title": "إعلان تجاري",
+      "cat": "tvc",
+      "type": "youtube",
+      "src": ""
+    }
+  ]
+}

@@ -167,7 +167,7 @@ section{scroll-margin-top:var(--nav-h)}
 .filters button{height:40px;padding:0 18px;border:1px solid var(--line);border-radius:40px;font-family:var(--f-head);font-size:14px;color:rgba(244,241,234,.75);transition:.2s}
 .filters button:hover{border-color:rgba(226,178,76,.6);color:var(--paper)}
 .filters button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;grid-auto-flow:row dense}
 .work{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:3px;background:var(--navy);isolation:isolate}
 .work.big{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 .work.hide{display:none}
@@ -177,7 +177,9 @@ section{scroll-margin-top:var(--nav-h)}
 .work[data-h="2"] .scene{filter:hue-rotate(-30deg) brightness(.9)}
 .work[data-h="3"] .scene{filter:hue-rotate(160deg) saturate(.6)}
 .work::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,8,12,.12) 0%,transparent 30%,rgba(7,8,12,.6) 62%,rgba(7,8,12,.96) 100%);z-index:1}
-.work.tv img{height:109%;bottom:auto}  /* hides the broadcast ticker baked into TV thumbnails */
+.work.tv img{height:109%;bottom:auto}
+.work.ythq img{transform:scale(1.36)}  /* YouTube hqdefault has letterbox bars */
+.work.ythq:hover img{transform:scale(1.42)}  /* hides the broadcast ticker baked into TV thumbnails */
 .work .vf{--vi:14px;--vl:20px;--vc:var(--gold);z-index:2;opacity:0;transform:scale(1.06);transition:.35s}
 .work-info{position:absolute;right:20px;left:20px;bottom:18px;z-index:2}
 .work-cat{font-family:var(--f-head);font-size:13px;color:var(--gold)}
@@ -614,6 +616,8 @@ const SITE = {
   waText: 'مرحباً، أود الاستفسار عن خدمة تصوير',
   instagram: '',                                    // اسم الحساب بدون @ (مثال: almuftada.tv)
   inlineVideo: true,                                // true: يوتيوب يشتغل داخل الموقع | false: يفتح على يوتيوب
+  // بيانات لوحة التحكم (admin.html): الأعمال ومعلومات التواصل. إذا ما وصل الملف تُعرض القائمة اللي تحت
+  dataUrl: 'https://raw.githubusercontent.com/almuftada111/ALmuftada.github.io/main/site-data.json',
 };
 
 const CATS = {
@@ -671,10 +675,17 @@ const CREDITS = {
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // WhatsApp links
-  const wa = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(SITE.waText)}`;
-  $$('[data-wa]').forEach((a) => { a.href = wa; a.target = '_blank'; a.rel = 'noopener'; });
-  if (SITE.instagram) { const ig = $('#ig'); ig.href = `https://instagram.com/${SITE.instagram}`; $('#ig-h').textContent = '@' + SITE.instagram; ig.hidden = false; }
+  // Contact links (the dashboard's site-data.json can override them)
+  const applySettings = (s = {}) => {
+    const num = String(s.whatsapp || SITE.whatsapp).replace(/\D/g, '');
+    const wa = `https://wa.me/${num}?text=${encodeURIComponent(s.waText || SITE.waText)}`;
+    $$('[data-wa]').forEach((a) => { a.href = wa; a.target = '_blank'; a.rel = 'noopener'; });
+    const igName = String(s.instagram ?? SITE.instagram ?? '').replace(/^@/, '').trim();
+    const ig = $('#ig');
+    if (igName) { ig.href = `https://instagram.com/${encodeURIComponent(igName)}`; $('#ig-h').textContent = '@' + igName; }
+    ig.hidden = !igName;
+  };
+  applySettings();
   $('#yr').textContent = new Date().getFullYear();
 
   // Nav: solid on scroll, mobile menu, active link
@@ -703,31 +714,52 @@ const CREDITS = {
   };
   tick();
 
-  // Works grid + filters
+  // Works grid + filters. The inline WORKS list renders first; the dashboard's
+  // site-data.json replaces it as soon as it arrives.
   const grid = $('#grid'), filters = $('#filters');
-  const used = ['all', ...Object.keys(CATS).filter((k) => WORKS.some((w) => w.cat === k))];
-  filters.innerHTML = used.map((k, i) => `<button type="button" data-f="${k}" aria-pressed="${i === 0}">${k === 'all' ? 'الكل' : CATS[k]}</button>`).join('');
-  const ytId = (s) => (s.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/) || [, s])[1];
+  const ytId = (s) => (String(s).match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([\w-]{11})/) || [, s])[1];
   const ytUrl = (s) => `https://www.youtube.com/watch?v=${ytId(s)}`;
   const catLine = (w) => [CATS[w.cat], w.channel].filter(Boolean).map(esc).join(' · ');
-  grid.innerHTML = WORKS.map((w, i) => {
-    const has = !!w.src;
-    const thumb = w.thumb || (w.type === 'image' ? w.src : w.type === 'youtube' && has ? `https://i.ytimg.com/vi/${ytId(w.src)}/hqdefault.jpg` : '');
-    const media = `<div class="scene"></div>` + (thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">`
-      : has && w.type === 'video' ? `<video src="${esc(w.src)}#t=0.5" muted playsinline preload="metadata"></video>` : '');
-    const linkOut = has && w.type === 'youtube' && !SITE.inlineVideo;
-    const tag = !has ? 'div' : linkOut ? 'a' : 'button';
-    const attrs = !has ? '' : linkOut ? ` href="${ytUrl(w.src)}" target="_blank" rel="noopener" aria-label="شاهد على يوتيوب: ${esc(w.title)}"`
-      : ` type="button" aria-label="عرض: ${esc(w.title)}"`;
-    return `<${tag} class="work${w.big ? ' big' : ''}${w.type === 'youtube' && w.thumb ? ' tv' : ''}" data-cat="${w.cat}" data-i="${i}" data-h="${i % 4}"${attrs}>
-      ${media}<div class="vf"><i></i><i></i><i></i><i></i></div>
-      ${w.type !== 'image' ? `<span class="work-play"><svg><use href="#i-play"/></svg></span>` : ''}
-      ${has ? '' : '<span class="work-soon">SOON</span>'}
-      <div class="work-info"><div class="work-cat">${catLine(w)}</div><div class="work-title">${esc(w.title)}</div>${w.desc ? `<div class="work-desc">${esc(w.desc)}</div>` : ''}</div>
-    </${tag}>`;
-  }).join('');
-  // A thumbnail that fails to load reveals the placeholder scene underneath
-  $$('.work img', grid).forEach((img) => img.addEventListener('error', () => img.remove()));
+  let LIST = WORKS, BASE = '';
+  const res = (p) => (!p || /^(https?:|data:|blob:)/.test(p) ? p : BASE + p);
+  const renderWorks = (list) => {
+    LIST = list.filter((w) => w && w.title);
+    const used = ['all', ...Object.keys(CATS).filter((k) => LIST.some((w) => w.cat === k))];
+    filters.innerHTML = used.map((k, i) => `<button type="button" data-f="${k}" aria-pressed="${i === 0}">${k === 'all' ? 'الكل' : CATS[k]}</button>`).join('');
+    grid.innerHTML = LIST.map((w, i) => {
+      const has = !!w.src, ig = w.type === 'instagram';
+      const ytThumb = w.type === 'youtube' && has && !w.thumb;
+      const thumb = res(w.thumb || (w.type === 'image' ? w.src : '')) || (ytThumb ? `https://i.ytimg.com/vi/${ytId(w.src)}/hqdefault.jpg` : '');
+      const media = `<div class="scene"></div>` + (thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">`
+        : has && w.type === 'video' ? `<video src="${esc(res(w.src))}#t=0.5" muted playsinline preload="metadata"></video>` : '');
+      const linkOut = has && (ig || (w.type === 'youtube' && !SITE.inlineVideo));
+      const tag = !has ? 'div' : linkOut ? 'a' : 'button';
+      const attrs = !has ? '' : linkOut
+        ? ` href="${esc(ig ? w.src : ytUrl(w.src))}" target="_blank" rel="noopener" aria-label="${ig ? 'شاهد على إنستغرام' : 'شاهد على يوتيوب'}: ${esc(w.title)}"`
+        : ` type="button" aria-label="عرض: ${esc(w.title)}"`;
+      const cls = `work${w.big ? ' big' : ''}${w.type === 'youtube' && w.thumb ? ' tv' : ''}${ytThumb ? ' ythq' : ''}`;
+      return `<${tag} class="${cls}" data-cat="${esc(w.cat)}" data-i="${i}" data-h="${i % 4}"${attrs}>
+        ${media}<div class="vf"><i></i><i></i><i></i><i></i></div>
+        ${w.type !== 'image' ? `<span class="work-play"><svg><use href="#${ig ? 'i-ig' : 'i-play'}"/></svg></span>` : ''}
+        ${has ? '' : '<span class="work-soon">SOON</span>'}
+        <div class="work-info"><div class="work-cat">${catLine(w)}</div><div class="work-title">${esc(w.title)}</div>${w.desc ? `<div class="work-desc">${esc(w.desc)}</div>` : ''}</div>
+      </${tag}>`;
+    }).join('');
+    // A thumbnail that fails to load reveals the placeholder scene underneath
+    $$('.work img', grid).forEach((img) => img.addEventListener('error', () => img.remove()));
+  };
+  renderWorks(WORKS);
+  if (SITE.dataUrl) {
+    fetch(SITE.dataUrl + '?v=' + Date.now(), { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        BASE = SITE.dataUrl.replace(/[^/]*$/, '');
+        if (d.settings) applySettings(d.settings);
+        if (Array.isArray(d.works) && d.works.length) renderWorks(d.works);
+      })
+      .catch(() => {});
+  }
   filters.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
     $$('button', filters).forEach((x) => x.setAttribute('aria-pressed', x === b));
@@ -741,10 +773,10 @@ const CREDITS = {
   const close = () => { lb.classList.remove('open'); lbm.innerHTML = ''; document.body.style.overflow = ''; last && last.focus(); };
   grid.addEventListener('click', (e) => {
     const el = e.target.closest('button.work'); if (!el) return;
-    const w = WORKS[+el.dataset.i]; last = el;
+    const w = LIST[+el.dataset.i]; last = el;
     lbm.innerHTML = w.type === 'youtube' ? `<iframe src="https://www.youtube-nocookie.com/embed/${ytId(w.src)}?autoplay=1&rel=0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen title="${esc(w.title)}"></iframe>`
-      : w.type === 'video' ? `<video src="${esc(w.src)}" controls autoplay playsinline></video>`
-      : `<img src="${esc(w.src)}" alt="${esc(w.title)}">`;
+      : w.type === 'video' ? `<video src="${esc(res(w.src))}" controls autoplay playsinline></video>`
+      : `<img src="${esc(res(w.src))}" alt="${esc(w.title)}">`;
     lbc.innerHTML = `<small>${catLine(w)}</small>${esc(w.title)}${w.desc ? `<span class="lb-desc">${esc(w.desc)}</span>` : ''}${w.type === 'youtube' ? `<a class="lb-yt" href="${ytUrl(w.src)}" target="_blank" rel="noopener">مشاهدة على يوتيوب ↗</a>` : ''}`;
     lb.classList.add('open'); document.body.style.overflow = 'hidden'; $('#lb-x').focus();
   });

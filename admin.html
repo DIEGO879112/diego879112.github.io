@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم | المفتدى</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B0D12">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Dashboard for the portfolio: edits site-data.json in the GitHub repository through the GitHub API.
+   Layout: one narrow column (phone first), a sticky save bar at the bottom. */
+:root{
+  --ink:#0B0D12; --navy:#141B2D; --navy-2:#1C2540; --gold:#E2B24C; --gold-soft:#F3D08A;
+  --paper:#F4F1EA; --muted:#9499A8; --line:rgba(244,241,234,.12); --rec:#E5484D; --ok:#5BC08A;
+  --f-head:"Alexandria","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Alexandria",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--f-body);font-size:16px;line-height:1.7;min-height:100vh;padding-bottom:110px}
+a{color:var(--gold)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--paper);background:var(--ink);border:1px solid var(--line);border-radius:4px;padding:11px 12px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:transparent}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+[hidden]{display:none!important}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+.top{border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:64px}
+.mark{width:30px;height:30px;color:var(--paper);flex:none}
+.top h1{font-family:var(--f-head);font-weight:700;font-size:18px}
+.top h1 small{display:block;font-size:11px;color:var(--gold);font-weight:500;letter-spacing:.06em}
+.top .view{margin-right:auto;font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:40px;padding:6px 14px;color:var(--paper)}
+
+/* blocks */
+.card{background:var(--navy);border:1px solid var(--line);border-radius:8px;padding:22px 20px;margin-top:22px}
+h2{font-family:var(--f-head);font-weight:700;font-size:22px;line-height:1.4}
+.hint{color:var(--muted);font-size:14px;margin-top:6px}
+label{display:block;font-family:var(--f-head);font-size:14px;font-weight:500;margin:16px 0 6px}
+label .opt{color:var(--muted);font-weight:400;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row > *{min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:4px;font-family:var(--f-head);font-weight:600;font-size:15px}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:disabled{opacity:.45;cursor:not-allowed}
+.btn-line{border:1px solid var(--line)}
+.btn-line:hover{border-color:var(--gold)}
+.btn-block{width:100%;margin-top:18px}
+.err{color:#ff8a8d;font-size:14px;margin-top:10px}
+details{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;font-family:var(--f-head);font-size:14px;color:var(--gold)}
+ol.steps{padding-right:20px;margin-top:10px;font-size:14.5px;color:rgba(244,241,234,.85);display:grid;gap:8px}
+ol.steps b{color:var(--paper)}
+code{font-family:var(--f-mono);font-size:13px;background:rgba(244,241,234,.08);padding:1px 6px;border-radius:3px;direction:ltr;unicode-bidi:isolate}
+
+/* works list */
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px}
+.items{list-style:none;margin-top:14px;display:grid;gap:10px}
+.item{display:grid;grid-template-columns:96px 1fr auto;gap:12px;align-items:center;background:var(--navy);border:1px solid var(--line);border-radius:8px;padding:10px}
+.item.ghost{border-style:dashed}
+.thumb{width:96px;aspect-ratio:16/10;border-radius:4px;background:linear-gradient(135deg,var(--navy-2),var(--ink));overflow:hidden;position:relative;display:grid;place-items:center;color:var(--muted);font-size:11px}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.meta{min-width:0}
+.meta b{display:block;font-family:var(--f-head);font-weight:600;font-size:15px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta span{display:block;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tags{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.tag{font-size:11px;border-radius:20px;padding:1px 9px;border:1px solid var(--line);color:var(--muted)}
+.tag.gold{border-color:rgba(226,178,76,.5);color:var(--gold)}
+.tag.new{border-color:rgba(91,192,138,.5);color:var(--ok)}
+.acts{display:grid;grid-template-columns:repeat(2,36px);gap:4px}
+.ic{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;border:1px solid var(--line);font-size:15px;line-height:1}
+.ic:hover{border-color:var(--gold)}
+.ic:disabled{opacity:.3;cursor:not-allowed}
+.ic.del.armed{background:var(--rec);border-color:var(--rec);color:#fff;grid-column:span 2;width:auto;font-size:12px;padding:0 6px}
+.empty{color:var(--muted);text-align:center;padding:26px 10px;border:1px dashed var(--line);border-radius:8px;margin-top:14px}
+
+/* editor sheet */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(5,6,9,.75);display:flex;align-items:flex-end;justify-content:center}
+.sheet-box{background:var(--navy);width:min(640px,100%);max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;border:1px solid var(--line);padding:20px max(18px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))}
+@media (min-width:700px){.sheet{align-items:center}.sheet-box{border-radius:12px}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.types label{margin:0}
+.types input{position:absolute;opacity:0;width:1px;height:1px}
+.types span{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border:1px solid var(--line);border-radius:6px;font-size:13px;text-align:center;cursor:pointer}
+.types span i{font-style:normal;font-size:20px}
+.types input:checked + span{border-color:var(--gold);background:rgba(226,178,76,.1);color:var(--gold)}
+.types input:focus-visible + span{outline:2px solid var(--gold)}
+.file-hidden{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.file-btn{margin:0;width:100%;cursor:pointer;font-size:14px}
+.file-hidden:focus-visible + .file-btn{outline:2px solid var(--gold);outline-offset:2px}
+.preview{margin-top:12px;width:100%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:linear-gradient(135deg,var(--navy-2),var(--ink));display:grid;place-items:center;color:var(--muted);font-size:13px;position:relative}
+.preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.check{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:15px}
+.check input{width:20px;height:20px;accent-color:var(--gold)}
+.sheet-acts{display:flex;gap:10px;margin-top:22px}
+.sheet-acts .btn{flex:1}
+
+/* save bar */
+.savebar{position:fixed;inset:auto 0 0;z-index:40;background:rgba(11,13,18,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.savebar .wrap{display:flex;align-items:center;gap:12px;min-height:72px}
+.status{flex:1;font-size:14px;color:var(--muted);line-height:1.5}
+.status.dirty{color:var(--gold-soft)}
+.status.ok{color:var(--ok)}
+.status.bad{color:#ff8a8d}
+.foot{margin-top:34px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.foot button{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="m" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="square"><path d="M10 32 V10 H32"/><path d="M68 10 H90 V32"/><path d="M90 68 V90 H68"/><path d="M32 90 H10 V68"/></g><circle cx="63.3" cy="36.7" r="10" fill="#E2B24C"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#m"/></svg>
+    <h1>لوحة التحكم<small>المفتدى · موقع الأعمال</small></h1>
+    <a class="view" href="./" target="_blank" rel="noopener">عرض الموقع ↗</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- LOGIN -->
+  <section id="login" class="card" hidden>
+    <h2>ادخل للوحة التحكم</h2>
+    <p class="hint">الصق رمز GitHub الخاص بيك. ينحفظ بهذا المتصفح بس، وما يطّلع عليه أحد.</p>
+    <label for="token">رمز GitHub</label>
+    <input id="token" type="password" class="ltr" autocomplete="off" spellcheck="false" placeholder="github_pat_...">
+    <button class="btn btn-gold btn-block" id="connect" type="button">دخول</button>
+    <p class="err" id="login-err" hidden></p>
+    <details>
+      <summary>شلون أطلع الرمز؟</summary>
+      <ol class="steps">
+        <li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">صفحة إنشاء رمز جديد بـ GitHub</a></li>
+        <li><b>Token name</b> (اسم الرمز): اكتب <code>لوحة الموقع</code></li>
+        <li><b>Expiration</b> (الانتهاء): اختار أطول مدة موجودة</li>
+        <li><b>Repository access</b>: اختار <b>Only select repositories</b> وبعدها اختار مستودع موقعك</li>
+        <li><b>Permissions</b> ← <b>Repository permissions</b> ← <b>Contents</b>: اختار <b>Read and write</b></li>
+        <li>اضغط <b>Generate token</b>، وانسخ الرمز (يبدي بـ <code>github_pat_</code>) والصقه فوق</li>
+      </ol>
+    </details>
+    <details>
+      <summary>إعدادات المستودع</summary>
+      <div class="row">
+        <div><label for="cfg-owner">اسم الحساب</label><input id="cfg-owner" class="ltr" spellcheck="false"></div>
+        <div><label for="cfg-repo">اسم المستودع</label><input id="cfg-repo" class="ltr" spellcheck="false"></div>
+      </div>
+      <label for="cfg-branch">الفرع</label><input id="cfg-branch" class="ltr" spellcheck="false">
+    </details>
+  </section>
+
+  <!-- APP -->
+  <section id="app" hidden>
+    <div class="list-head">
+      <div><h2>الأعمال</h2><p class="hint">الأول بالقائمة يطلع أول شي بالموقع.</p></div>
+      <button class="btn btn-gold" id="add" type="button">+ إضافة عمل</button>
+    </div>
+    <ul class="items" id="items"></ul>
+
+    <div class="card">
+      <h2>معلومات التواصل</h2>
+      <label for="s-ig">حساب إنستغرام <span class="opt">(بدون @)</span></label>
+      <input id="s-ig" class="ltr" spellcheck="false" placeholder="almuftada">
+      <label for="s-wa">رقم الواتساب <span class="opt">(بالصيغة الدولية، مثل 9647701234567)</span></label>
+      <input id="s-wa" class="ltr" inputmode="numeric" placeholder="9647747933540">
+    </div>
+
+    <div class="foot">
+      <span id="repo-line" class="ltr"></span>
+      <button type="button" id="logout">تسجيل خروج من هذا الجهاز</button>
+    </div>
+  </section>
+</main>
+
+<!-- EDITOR -->
+<div class="sheet" id="sheet" hidden>
+  <form class="sheet-box" id="form" novalidate>
+    <div class="sheet-head"><h2 id="sheet-title">إضافة عمل</h2><button type="button" class="ic" id="sheet-x" aria-label="إغلاق">✕</button></div>
+
+    <label>نوع العمل</label>
+    <div class="types">
+      <label><input type="radio" name="type" value="youtube"><span><i>▶</i>فيديو يوتيوب</span></label>
+      <label><input type="radio" name="type" value="instagram"><span><i>◎</i>ريلز إنستغرام</span></label>
+      <label><input type="radio" name="type" value="image"><span><i>▣</i>صورة</span></label>
+    </div>
+
+    <div id="f-link-wrap">
+      <label for="f-link" id="f-link-label">رابط الفيديو</label>
+      <input id="f-link" class="ltr" type="url" spellcheck="false" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+
+    <label for="f-file" id="f-file-label">صورة الغلاف <span class="opt" id="f-file-opt">(اختياري)</span></label>
+    <input id="f-file" type="file" accept="image/*" class="file-hidden">
+    <label for="f-file" class="btn btn-line file-btn">📷 اختار صورة من الموبايل</label>
+    <div class="preview" id="f-preview">بدون صورة</div>
+
+    <label for="f-title">العنوان</label>
+    <input id="f-title" required placeholder="مثلاً: صباح المتنبي">
+
+    <div class="row">
+      <div><label for="f-cat">القسم</label><select id="f-cat"></select></div>
+      <div><label for="f-channel">القناة أو الجهة <span class="opt">(اختياري)</span></label><input id="f-channel" placeholder="هنا العراق"></div>
+    </div>
+
+    <label for="f-desc">سطر تفاصيل <span class="opt">(اختياري)</span></label>
+    <input id="f-desc" placeholder="بغداد، شارع المتنبي · تقديم ...">
+
+    <label class="check"><input type="checkbox" id="f-big"> اعرضه كبير بالموقع</label>
+
+    <p class="err" id="f-err" hidden></p>
+    <div class="sheet-acts">
+      <button type="submit" class="btn btn-gold">تم</button>
+      <button type="button" class="btn btn-line" id="f-cancel">إلغاء</button>
+    </div>
+  </form>
+</div>
+
+<!-- SAVE BAR -->
+<div class="savebar" id="savebar" hidden>
+  <div class="wrap">
+    <p class="status" id="status" role="status" aria-live="polite">كل شي محفوظ</p>
+    <button class="btn btn-gold" id="save" type="button" disabled>حفظ ونشر</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const CATS = {
+    social:   'محتوى رقمي',
+    programs: 'برامج تلفزيونية',
+    news:     'إخباري ميداني',
+    studio:   'استوديو وبث مباشر',
+    tvc:      'إعلانات TVC',
+  };
+  const DEF = { owner: 'almuftada111', repo: 'ALmuftada.github.io', branch: 'main', path: 'site-data.json' };
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+    del: (k) => { try { localStorage.removeItem(k); } catch {} },
+  };
+
+  let cfg = { ...DEF };
+  try { cfg = { ...DEF, ...JSON.parse(store.get('mft_cfg') || '{}') }; } catch {}
+  let token = store.get('mft_token') || '';
+  let data = null, sha = null, dirty = false, busy = false;
+
+  const ytId = (s) => { const m = String(s || '').match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([\w-]{11})/); return m ? m[1] : (/^[\w-]{11}$/.test(s) ? s : ''); };
+  const rawBase = () => `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/`;
+  const resolve = (p) => (!p ? '' : /^(https?:|data:|blob:)/.test(p) ? p : rawBase() + p);
+  const thumbOf = (w) => w._preview || resolve(w.thumb || (w.type === 'image' ? w.src : '')) || (w.type === 'youtube' && ytId(w.src) ? `https://i.ytimg.com/vi/${ytId(w.src)}/mqdefault.jpg` : '');
+
+  /* ---------- GitHub API ---------- */
+  const api = async (path, opts = {}) => {
+    const r = await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${path}`, {
+      ...opts,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+      },
+    });
+    if (!r.ok) { const e = new Error('GitHub ' + r.status); e.status = r.status; throw e; }
+    return r.status === 204 ? null : r.json();
+  };
+  const b64FromBytes = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+  const bytesFromB64 = (b) => { const s = atob(String(b).replace(/\s/g, '')); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+  const explain = (e) => {
+    if (e.status === 401) return 'الرمز غلط أو منتهي. سوّي رمز جديد والصقه.';
+    if (e.status === 403) return 'الرمز ما عنده صلاحية كتابة. تأكد إنك اخترت Contents: Read and write.';
+    if (e.status === 404) return 'ما لگيت المستودع. تأكد إن الرمز مربوط بمستودع موقعك، وإن اسم الحساب والمستودع صحيح (من "إعدادات المستودع").';
+    if (e.status === 409 || e.status === 422) return 'صار تعديل على الموقع من مكان ثاني. حدّث الصفحة وأعد التعديل.';
+    return 'ما گدرت أتصل بـ GitHub. تأكد من الإنترنت وجرّب مرة ثانية.';
+  };
+
+  /* ---------- load ---------- */
+  const load = async () => {
+    const f = await api(`/contents/${cfg.path}?ref=${encodeURIComponent(cfg.branch)}`);
+    sha = f.sha;
+    data = JSON.parse(new TextDecoder().decode(bytesFromB64(f.content)));
+    data.settings = data.settings || {};
+    data.works = Array.isArray(data.works) ? data.works : [];
+  };
+
+  /* ---------- UI ---------- */
+  const setStatus = (text, kind = '') => { const s = $('#status'); s.textContent = text; s.className = 'status ' + kind; };
+  const markDirty = () => { dirty = true; $('#save').disabled = busy; setStatus('عندك تغييرات ما انحفظت بعد', 'dirty'); };
+
+  const renderList = () => {
+    const ul = $('#items');
+    if (!data.works.length) { ul.innerHTML = '<li class="empty">ما كو أعمال. اضغط "+ إضافة عمل".</li>'; return; }
+    ul.innerHTML = data.works.map((w, i) => {
+      const t = thumbOf(w);
+      const kind = w.type === 'instagram' ? 'ريلز' : w.type === 'image' ? 'صورة' : 'يوتيوب';
+      return `<li class="item${w.src ? '' : ' ghost'}">
+        <div class="thumb">${t ? `<img src="${esc(t)}" alt="" loading="lazy">` : 'بدون صورة'}</div>
+        <div class="meta"><b>${esc(w.title)}</b><span>${esc([CATS[w.cat], w.channel].filter(Boolean).join(' · '))}</span>
+          <div class="tags"><span class="tag">${kind}</span>${w.big ? '<span class="tag gold">كبير</span>' : ''}${w.src ? '' : '<span class="tag">مؤقت (SOON)</span>'}${w._file ? '<span class="tag new">صورة جديدة</span>' : ''}</div></div>
+        <div class="acts">
+          <button class="ic" type="button" data-act="up" data-i="${i}" aria-label="لفوق" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button class="ic" type="button" data-act="edit" data-i="${i}" aria-label="تعديل">✎</button>
+          <button class="ic" type="button" data-act="down" data-i="${i}" aria-label="لجوه" ${i === data.works.length - 1 ? 'disabled' : ''}>↓</button>
+          <button class="ic del" type="button" data-act="del" data-i="${i}" aria-label="حذف">🗑</button>
+        </div>
+      </li>`;
+    }).join('');
+    ul.querySelectorAll('.thumb img').forEach((img) => img.addEventListener('error', () => img.remove()));
+  };
+
+  const showApp = () => {
+    $('#login').hidden = true; $('#app').hidden = false; $('#savebar').hidden = false;
+    $('#s-ig').value = data.settings.instagram || '';
+    $('#s-wa').value = data.settings.whatsapp || '';
+    $('#repo-line').textContent = `${cfg.owner}/${cfg.repo}`;
+    renderList(); setStatus('كل شي محفوظ'); dirty = false; $('#save').disabled = true;
+  };
+  const showLogin = (msg) => {
+    $('#app').hidden = true; $('#savebar').hidden = true; $('#login').hidden = false;
+    $('#cfg-owner').value = cfg.owner; $('#cfg-repo').value = cfg.repo; $('#cfg-branch').value = cfg.branch;
+    const e = $('#login-err'); e.textContent = msg || ''; e.hidden = !msg;
+  };
+
+  $('#connect').addEventListener('click', async () => {
+    const t = $('#token').value.trim();
+    if (!t) { showLogin('الصق الرمز أول.'); return; }
+    cfg = { ...cfg, owner: $('#cfg-owner').value.trim() || DEF.owner, repo: $('#cfg-repo').value.trim() || DEF.repo, branch: $('#cfg-branch').value.trim() || DEF.branch };
+    token = t;
+    const b = $('#connect'); b.disabled = true; b.textContent = 'جاري الدخول…';
+    try {
+      await load();
+      store.set('mft_token', token); store.set('mft_cfg', JSON.stringify(cfg));
+      $('#token').value = '';
+      showApp();
+    } catch (e) { token = ''; showLogin(explain(e)); }
+    b.disabled = false; b.textContent = 'دخول';
+  });
+
+  $('#logout').addEventListener('click', () => {
+    if (dirty) { setStatus('احفظ تغييراتك أول، أو حدّث الصفحة حتى تلغيها', 'bad'); return; }
+    store.del('mft_token'); token = ''; data = null; showLogin('');
+  });
+
+  /* list actions */
+  let armed = null;
+  $('#items').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    const i = +b.dataset.i, act = b.dataset.act, W = data.works;
+    if (act === 'up' && i > 0) { [W[i - 1], W[i]] = [W[i], W[i - 1]]; markDirty(); renderList(); }
+    if (act === 'down' && i < W.length - 1) { [W[i + 1], W[i]] = [W[i], W[i + 1]]; markDirty(); renderList(); }
+    if (act === 'edit') openEditor(i);
+    if (act === 'del') {
+      if (armed === i) { W.splice(i, 1); armed = null; markDirty(); renderList(); return; }
+      armed = i; renderList();
+      const btn = $(`#items button[data-act="del"][data-i="${i}"]`);
+      btn.classList.add('armed'); btn.textContent = 'تأكيد الحذف';
+      setTimeout(() => { if (armed === i) { armed = null; renderList(); } }, 3500);
+    }
+  });
+  ['#s-ig', '#s-wa'].forEach((id) => $(id).addEventListener('input', () => {
+    data.settings.instagram = $('#s-ig').value.replace(/^@/, '').trim();
+    data.settings.whatsapp = $('#s-wa').value.replace(/\D/g, '');
+    markDirty();
+  }));
+
+  /* ---------- editor ---------- */
+  $('#f-cat').innerHTML = Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  let editing = -1, draft = null;
+  const typeVal = () => (document.querySelector('input[name="type"]:checked') || {}).value || 'youtube';
+  const syncType = () => {
+    const t = typeVal();
+    $('#f-link-wrap').hidden = t === 'image';
+    $('#f-link-label').textContent = t === 'instagram' ? 'رابط الريل من إنستغرام' : 'رابط الفيديو من يوتيوب';
+    $('#f-link').placeholder = t === 'instagram' ? 'https://www.instagram.com/reel/...' : 'https://www.youtube.com/watch?v=...';
+    $('#f-file-opt').textContent = t === 'youtube' ? '(اختياري، إذا ما حطيت تنسحب من يوتيوب)' : '(مطلوبة)';
+    $('#f-file-label').firstChild.textContent = t === 'image' ? 'الصورة ' : 'صورة الغلاف ';
+    paintPreview();
+  };
+  const paintPreview = () => {
+    const t = draft._preview || resolve(draft.thumb || (typeVal() === 'image' ? draft.src : '')) ||
+      (typeVal() === 'youtube' && ytId($('#f-link').value) ? `https://i.ytimg.com/vi/${ytId($('#f-link').value)}/hqdefault.jpg` : '');
+    $('#f-preview').innerHTML = t ? `<img src="${esc(t)}" alt="">` : 'بدون صورة';
+  };
+  const openEditor = (i) => {
+    editing = i;
+    const w = i >= 0 ? data.works[i] : { type: 'youtube', cat: 'programs', title: '', src: '' };
+    draft = { ...w };
+    $('#sheet-title').textContent = i >= 0 ? 'تعديل العمل' : 'إضافة عمل';
+    const t = ['youtube', 'instagram', 'image'].includes(w.type) ? w.type : 'youtube';
+    document.querySelector(`input[name="type"][value="${t}"]`).checked = true;
+    $('#f-link').value = t === 'image' ? '' : (w.src || '');
+    $('#f-title').value = w.title || '';
+    $('#f-cat').value = CATS[w.cat] ? w.cat : 'programs';
+    $('#f-channel').value = w.channel || '';
+    $('#f-desc').value = w.desc || '';
+    $('#f-big').checked = !!w.big;
+    $('#f-file').value = '';
+    $('#f-err').hidden = true;
+    syncType();
+    $('#sheet').hidden = false; document.body.style.overflow = 'hidden';
+    setTimeout(() => $('#f-link').focus(), 50);
+  };
+  const closeEditor = () => { $('#sheet').hidden = true; document.body.style.overflow = ''; draft = null; editing = -1; };
+  document.querySelectorAll('input[name="type"]').forEach((r) => r.addEventListener('change', syncType));
+  $('#f-link').addEventListener('input', paintPreview);
+  $('#f-link').addEventListener('change', async () => {
+    // Fill the title from YouTube when it is empty
+    const id = ytId($('#f-link').value);
+    if (typeVal() !== 'youtube' || !id || $('#f-title').value.trim()) return;
+    try {
+      const r = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent('https://www.youtube.com/watch?v=' + id)}`);
+      if (r.ok) { const j = await r.json(); if (!$('#f-title').value.trim() && j.title) $('#f-title').value = j.title.split(/[|#(]/)[0].replace(/^برنامج\s+/, '').trim(); }
+    } catch {}
+  });
+  $('#f-file').addEventListener('change', async () => {
+    const file = $('#f-file').files[0]; if (!file) return;
+    try {
+      const blob = await shrink(file);
+      if (draft._preview) URL.revokeObjectURL(draft._preview);
+      draft._file = blob; draft._preview = URL.createObjectURL(blob);
+      paintPreview();
+    } catch { showFormErr('ما گدرت أقرا الصورة. جرّب صورة ثانية (JPG أو PNG).'); }
+  });
+  const shrink = (file) => new Promise((ok, bad) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob((b) => (b ? ok(b) : bad(new Error('encode'))), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(new Error('decode')); };
+    img.src = url;
+  });
+  const showFormErr = (m) => { const e = $('#f-err'); e.textContent = m; e.hidden = false; };
+
+  $('#form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const t = typeVal(), link = $('#f-link').value.trim(), title = $('#f-title').value.trim();
+    if (t === 'youtube' && link && !ytId(link)) return showFormErr('الرابط مو رابط يوتيوب صحيح. انسخه من زر "مشاركة" باليوتيوب.');
+    if (t === 'instagram' && link && !/instagram\.com\//i.test(link)) return showFormErr('الرابط مو رابط إنستغرام. انسخه من زر "مشاركة" بالريل.');
+    if (t === 'instagram' && link && !draft._file && !draft.thumb) return showFormErr('الريل يحتاج صورة غلاف. خذ سكرين شوت من الريل وارفعها.');
+    if (t === 'image' && !draft._file && !draft.src) return showFormErr('اختار الصورة أول.');
+    if (!title) return showFormErr('اكتب عنوان للعمل.');
+    const w = {
+      title, cat: $('#f-cat').value, type: t,
+      src: t === 'image' ? (draft.src || '') : (t === 'youtube' && link ? `https://www.youtube.com/watch?v=${ytId(link)}` : link),
+    };
+    const ch = $('#f-channel').value.trim(), desc = $('#f-desc').value.trim();
+    if (ch) w.channel = ch;
+    if (desc) w.desc = desc;
+    if ($('#f-big').checked) w.big = true;
+    // keep an existing cover unless the video link changed (an old YouTube cover would no longer match)
+    const linkChanged = editing >= 0 && data.works[editing].src !== w.src && t !== 'image';
+    if (draft.thumb && !(linkChanged && t === 'youtube')) w.thumb = draft.thumb;
+    if (draft._file) { w._file = draft._file; w._preview = draft._preview; }
+    if (editing >= 0) data.works[editing] = w; else data.works.unshift(w);
+    draft._preview = null; // now owned by the work
+    closeEditor(); markDirty(); renderList();
+  });
+  $('#add').addEventListener('click', () => openEditor(-1));
+  $('#f-cancel').addEventListener('click', closeEditor);
+  $('#sheet-x').addEventListener('click', closeEditor);
+  $('#sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeEditor(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheet').hidden) closeEditor(); });
+
+  /* ---------- save & publish ---------- */
+  $('#save').addEventListener('click', async () => {
+    if (busy || !dirty) return;
+    busy = true; $('#save').disabled = true;
+    try {
+      const pending = data.works.filter((w) => w._file);
+      let n = 0;
+      for (const w of pending) {
+        n++; setStatus(`جاري رفع الصور… (${n} من ${pending.length})`);
+        const name = `assets/works/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+        const bytes = new Uint8Array(await w._file.arrayBuffer());
+        await api(`/contents/${name}`, { method: 'PUT', body: JSON.stringify({ message: `رفع صورة: ${w.title}`, content: b64FromBytes(bytes), branch: cfg.branch }) });
+        w.thumb = name;
+        if (w.type === 'image') w.src = name;
+        delete w._file;
+      }
+      setStatus('جاري النشر…');
+      const clean = { settings: data.settings, works: data.works.map(({ _file, _preview, ...w }) => w) };
+      const text = JSON.stringify(clean, null, 2) + '\n';
+      const res = await api(`/contents/${cfg.path}`, { method: 'PUT', body: JSON.stringify({ message: 'تحديث الأعمال من لوحة التحكم', content: b64FromBytes(new TextEncoder().encode(text)), sha, branch: cfg.branch }) });
+      sha = res.content.sha;
+      dirty = false;
+      setStatus('تم النشر ✅ الموقع يتحدث خلال دقائق قليلة (حتى 5 دقائق)', 'ok');
+      renderList();
+    } catch (e) {
+      setStatus(explain(e), 'bad');
+      $('#save').disabled = false;
+    }
+    busy = false;
+    if (dirty) $('#save').disabled = false;
+  });
+  addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- start ---------- */
+  if (token) {
+    setStatus('جاري التحميل…');
+    load().then(showApp).catch((e) => { if (e.status === 401) store.del('mft_token'); token = ''; showLogin(explain(e)); });
+  } else showLogin('');
+})();
+</script>
+</body>
+</html>
