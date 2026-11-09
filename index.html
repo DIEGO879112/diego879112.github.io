@@ -9,11 +9,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="المفتدى أحمد زيدان | مصور تلفزيوني">
 <meta property="og:description" content="تصوير إخباري ميداني · استوديو البث المباشر · إعلانات TVC · محتوى رقمي">
-<meta property="og:image" content="https://almuftada.netlify.app/assets/og-image.png">
+<meta property="og:image" content="https://almuftada111.github.io/ALmuftada.github.io/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://almuftada.netlify.app/">
-<link rel="canonical" href="https://almuftada.netlify.app/">
+<meta property="og:url" content="https://almuftada111.github.io/ALmuftada.github.io/">
+<link rel="canonical" href="https://almuftada111.github.io/ALmuftada.github.io/">
 <meta property="og:locale" content="ar_IQ">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -617,7 +617,9 @@ const SITE = {
   instagram: '',                                    // اسم الحساب بدون @ (مثال: almuftada.tv)
   inlineVideo: true,                                // true: يوتيوب يشتغل داخل الموقع | false: يفتح على يوتيوب
   // بيانات لوحة التحكم (admin.html): الأعمال ومعلومات التواصل. إذا ما وصل الملف تُعرض القائمة اللي تحت
-  dataUrl: 'https://raw.githubusercontent.com/almuftada111/ALmuftada.github.io/main/site-data.json',
+  // على GitHub Pages يُقرأ من نفس الموقع (أسرع)، وبأي استضافة ثانية من المستودع مباشرة
+  dataUrl: /\.github\.io$/.test(location.hostname) ? 'site-data.json'
+    : 'https://raw.githubusercontent.com/almuftada111/ALmuftada.github.io/main/site-data.json',
 };
 
 const CATS = {
