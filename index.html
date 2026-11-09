@@ -215,12 +215,15 @@ button.work,a.work{display:block;cursor:pointer;text-align:right;width:100%;font
   radial-gradient(60% 45% at 58% 30%,rgba(226,178,76,.24),transparent 70%),
   linear-gradient(180deg,var(--navy-2),var(--ink))}
 /* scroll "focus pull": --p goes 0→1 as the frame scrolls in (set by JS; 1 = final state without JS) */
-.shot{--p:1;--q:0}
+/* --t: -1..1 position while passing through the viewport, --ta: 1-|t|, --mx/--my: pointer or phone tilt (-1..1) */
+.shot{--p:1;--t:0;--ta:1;--mx:0;--my:0}
+.shot-frame{transform:translate3d(calc(var(--mx) * -9px),calc(var(--t) * -10px + var(--my) * -5px),0)}
 .shot .vf{--vi:calc(14px + (1 - var(--p)) * 26px);--vl:calc(18px + var(--p) * 10px);--vc:var(--gold)}
 .shot-rec{position:absolute;top:22px;right:26px;font-size:11px;color:var(--paper);opacity:calc(.35 + var(--p) * .65)}
-.shot-clip{position:absolute;top:-32%;left:-15%;right:-6%;bottom:0;overflow:hidden;z-index:1;pointer-events:none}
-.shot-cut{position:absolute;bottom:0;right:2.48%;width:93.4%;max-width:none;height:auto;transform-origin:60% 100%;
-  transform:translateY(calc((1 - var(--p)) * 16% - var(--q) * 5%)) scale(calc(.9 + var(--p) * .1));
+.shot-clip{position:absolute;top:-32%;left:-15%;right:-10%;bottom:0;overflow:hidden;z-index:1;pointer-events:none;perspective:1000px}
+.shot-cut{position:absolute;bottom:0;right:5.6%;width:90.4%;max-width:none;height:auto;transform-origin:60% 100%;
+  transform:translate3d(calc(var(--mx) * 22px),calc((1 - var(--p)) * 16% + var(--t) * 6% + var(--my) * 6px),0)
+    rotateY(calc(var(--mx) * 9deg)) rotateX(calc(var(--my) * -3deg)) scale(calc(.9 + var(--p) * .1 + var(--ta) * .03));
   filter:blur(calc((1 - var(--p)) * 7px)) drop-shadow(0 18px 28px rgba(0,0,0,.45));will-change:transform,filter}
 .shot.locked .shot-cut{filter:drop-shadow(0 18px 28px rgba(0,0,0,.45))}
 .shot-af{position:absolute;left:20px;bottom:18px;z-index:3;display:flex;align-items:center;gap:8px;direction:ltr;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:rgba(244,241,234,.75)}
@@ -228,7 +231,7 @@ button.work,a.work{display:block;cursor:pointer;text-align:right;width:100%;font
 .af-bar i{display:block;height:100%;width:calc(var(--p) * 100%);background:var(--gold)}
 .af-lock{color:var(--gold);opacity:0;transition:opacity .3s}
 .shot.locked .af-lock{opacity:1}
-.shot::after{content:"";position:absolute;inset:auto 0 0;height:18%;background:linear-gradient(180deg,transparent,var(--ink));z-index:2;pointer-events:none}
+.shot::after{content:"";position:absolute;inset:auto 0 0;height:24%;background:linear-gradient(180deg,transparent,var(--ink));z-index:2;pointer-events:none}
 .about-lead{font-family:var(--f-head);font-weight:500;font-size:clamp(21px,2.3vw,28px);line-height:1.7}
 .about-lead em{font-style:normal;color:var(--gold)}
 .about-txt{color:rgba(244,241,234,.75);margin-top:22px}
@@ -749,24 +752,68 @@ const CREDITS = {
   lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('open')) close(); });
 
-  // About photo: focus pull tied to scroll position
+  // About photo: focus pull on scroll-in, depth parallax while scrolling,
+  // and tilt that follows the mouse (desktop) or the phone's motion sensor.
   const shot = $('.shot');
   if (shot && !reduce) {
-    let ticking = false;
-    const update = () => {
-      ticking = false;
+    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+    const cur = { p: 1, t: 0, mx: 0, my: 0 }, tgt = { p: 1, t: 0, mx: 0, my: 0 };
+    let raf = 0;
+    const measure = () => {
       const r = shot.getBoundingClientRect(), vh = innerHeight;
-      const raw = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.65)));
-      const p = 1 - Math.pow(1 - raw, 3);                       // ease-out
-      const q = Math.min(1, Math.max(0, (vh * 0.35 - r.top) / vh)); // gentle drift after lock
-      shot.style.setProperty('--p', p.toFixed(3));
-      shot.style.setProperty('--q', q.toFixed(3));
+      const raw = clamp((vh - r.top) / (vh * 0.65), 0, 1);
+      tgt.p = 1 - Math.pow(1 - raw, 3);
+      // +1 entering from below, 0 centred, limited on the way out so the cut edge stays hidden
+      tgt.t = clamp((r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2), -0.4, 1);
       shot.classList.toggle('locked', raw > 0.985);
     };
-    const onMove = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    addEventListener('scroll', onMove, { passive: true });
-    addEventListener('resize', onMove);
-    update();
+    const paint = () => {
+      raf = 0;
+      let moving = false;
+      for (const k in cur) {
+        const d = tgt[k] - cur[k];
+        cur[k] += d * (k === 'p' ? 0.3 : 0.09);
+        if (Math.abs(d) > 0.002) moving = true;
+      }
+      const s = shot.style;
+      s.setProperty('--p', cur.p.toFixed(3));
+      s.setProperty('--t', cur.t.toFixed(3));
+      s.setProperty('--ta', (1 - Math.abs(cur.t)).toFixed(3));
+      s.setProperty('--mx', cur.mx.toFixed(3));
+      s.setProperty('--my', cur.my.toFixed(3));
+      if (moving) raf = requestAnimationFrame(paint);
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(paint); };
+    addEventListener('scroll', () => { measure(); kick(); }, { passive: true });
+    addEventListener('resize', () => { measure(); kick(); });
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      tgt.mx = (e.clientX / innerWidth) * 2 - 1;
+      tgt.my = (e.clientY / innerHeight) * 2 - 1;
+      kick();
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => { tgt.mx = 0; tgt.my = 0; kick(); });
+    const onTilt = (e) => {
+      if (e.gamma == null) return;
+      tgt.mx = clamp(e.gamma / 25, -1, 1);
+      tgt.my = clamp((e.beta - 55) / 25, -1, 1);
+      kick();
+    };
+    if (window.DeviceOrientationEvent) {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iPhone: motion access must come from a tap
+        shot.addEventListener('click', () => {
+          DeviceOrientationEvent.requestPermission()
+            .then((st) => { if (st === 'granted') addEventListener('deviceorientation', onTilt); })
+            .catch(() => {});
+        }, { once: true });
+      } else {
+        addEventListener('deviceorientation', onTilt);
+      }
+    }
+    measure();
+    cur.p = tgt.p; cur.t = tgt.t;
+    paint();
   }
 
   // Credits marquee
