@@ -8,7 +8,10 @@
       "title": "محتوى إنستغرام",
       "cat": "social",
       "type": "instagram",
-      "src": ""
+      "src": "https://www.instagram.com/_wt7x/reel/DfXySkNNrSS/",
+      "channel": "انستجرام",
+      "big": true,
+      "thumb": "assets/works/mw92f88n-h509.jpg"
     },
     {
       "title": "العبها صح",
@@ -73,12 +76,6 @@
       "src": "https://www.youtube.com/watch?v=p2pzbdzLmY4",
       "thumb": "assets/works/almaraa-walmujtama.jpg",
       "desc": "بغداد، مول المنصور · تقديم إيناس الفتلاوي"
-    },
-    {
-      "title": "إعلان تجاري",
-      "cat": "tvc",
-      "type": "youtube",
-      "src": ""
     }
   ]
 }
