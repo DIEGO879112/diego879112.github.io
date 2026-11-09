@@ -214,9 +214,20 @@ button.work,a.work{display:block;cursor:pointer;text-align:right;width:100%;font
   linear-gradient(180deg,transparent calc(33.33% - .5px),rgba(244,241,234,.07) 0 calc(33.33% + .5px),transparent 0 calc(66.66% - .5px),rgba(244,241,234,.07) 0 calc(66.66% + .5px),transparent 0),
   radial-gradient(60% 45% at 58% 30%,rgba(226,178,76,.24),transparent 70%),
   linear-gradient(180deg,var(--navy-2),var(--ink))}
-.shot .vf{--vi:14px;--vl:28px;--vc:var(--gold)}
-.shot-rec{position:absolute;top:22px;right:26px;font-size:11px;color:var(--paper)}
-.shot-cut{position:absolute;bottom:0;right:-3%;width:113%;max-width:none;height:auto;z-index:1;filter:drop-shadow(0 18px 28px rgba(0,0,0,.45))}
+/* scroll "focus pull": --p goes 0→1 as the frame scrolls in (set by JS; 1 = final state without JS) */
+.shot{--p:1;--q:0}
+.shot .vf{--vi:calc(14px + (1 - var(--p)) * 26px);--vl:calc(18px + var(--p) * 10px);--vc:var(--gold)}
+.shot-rec{position:absolute;top:22px;right:26px;font-size:11px;color:var(--paper);opacity:calc(.35 + var(--p) * .65)}
+.shot-clip{position:absolute;top:-32%;left:-15%;right:-6%;bottom:0;overflow:hidden;z-index:1;pointer-events:none}
+.shot-cut{position:absolute;bottom:0;right:2.48%;width:93.4%;max-width:none;height:auto;transform-origin:60% 100%;
+  transform:translateY(calc((1 - var(--p)) * 16% - var(--q) * 5%)) scale(calc(.9 + var(--p) * .1));
+  filter:blur(calc((1 - var(--p)) * 7px)) drop-shadow(0 18px 28px rgba(0,0,0,.45));will-change:transform,filter}
+.shot.locked .shot-cut{filter:drop-shadow(0 18px 28px rgba(0,0,0,.45))}
+.shot-af{position:absolute;left:20px;bottom:18px;z-index:3;display:flex;align-items:center;gap:8px;direction:ltr;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:rgba(244,241,234,.75)}
+.af-bar{width:54px;height:3px;background:rgba(244,241,234,.18);border-radius:2px;overflow:hidden}
+.af-bar i{display:block;height:100%;width:calc(var(--p) * 100%);background:var(--gold)}
+.af-lock{color:var(--gold);opacity:0;transition:opacity .3s}
+.shot.locked .af-lock{opacity:1}
 .shot::after{content:"";position:absolute;inset:auto 0 0;height:18%;background:linear-gradient(180deg,transparent,var(--ink));z-index:2;pointer-events:none}
 .about-lead{font-family:var(--f-head);font-weight:500;font-size:clamp(21px,2.3vw,28px);line-height:1.7}
 .about-lead em{font-style:normal;color:var(--gold)}
@@ -454,7 +465,8 @@ footer p{color:var(--muted);font-size:14px}
     <div class="about">
       <figure class="shot">
         <div class="shot-frame" aria-hidden="true"><div class="vf"><i></i><i></i><i></i><i></i></div><span class="rec shot-rec">REC</span></div>
-        <img class="shot-cut" src="assets/profile-cutout.webp" alt="المفتدى أحمد زيدان يصوّر بكاميرا على جيمبل" width="551" height="672" loading="lazy">
+        <div class="shot-clip"><img class="shot-cut" src="assets/profile-cutout.webp" alt="المفتدى أحمد زيدان يصوّر بكاميرا على جيمبل" width="1102" height="1344" loading="lazy"></div>
+        <div class="shot-af" aria-hidden="true"><span>AF</span><span class="af-bar"><i></i></span><span class="af-lock">LOCK</span></div>
       </figure>
       <div class="rv">
         <p class="about-lead">مصوّر تلفزيوني بخبرة ميدانية منذ <em class="ltr">2021</em> في القنوات الفضائية العراقية، أعمل بين <em>الشارع</em> و<em>الاستوديو</em> بالكفاءة نفسها.</p>
@@ -736,6 +748,26 @@ const CREDITS = {
   $('#lb-x').addEventListener('click', close);
   lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('open')) close(); });
+
+  // About photo: focus pull tied to scroll position
+  const shot = $('.shot');
+  if (shot && !reduce) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const r = shot.getBoundingClientRect(), vh = innerHeight;
+      const raw = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.65)));
+      const p = 1 - Math.pow(1 - raw, 3);                       // ease-out
+      const q = Math.min(1, Math.max(0, (vh * 0.35 - r.top) / vh)); // gentle drift after lock
+      shot.style.setProperty('--p', p.toFixed(3));
+      shot.style.setProperty('--q', q.toFixed(3));
+      shot.classList.toggle('locked', raw > 0.985);
+    };
+    const onMove = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    addEventListener('scroll', onMove, { passive: true });
+    addEventListener('resize', onMove);
+    update();
+  }
 
   // Credits marquee
   const items = [...CREDITS.channels.map((c) => `<li class="ch">${esc(c)}</li>`), ...CREDITS.programs.map((p) => `<li>${esc(p)}</li>`)].join('');
